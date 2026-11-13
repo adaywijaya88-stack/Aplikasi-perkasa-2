@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Daftar Hadir & Tanda Tangan (Aplikasi Perkasa)</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background: linear-gradient(135deg, #0f766e 0%, #0369a1 100%); 
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+        }
+        .container { 
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(224, 242, 254, 0.92)); 
+            backdrop-filter: blur(10px);
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25); 
+            width: 100%; 
+            max-width: 600px; 
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .header-banner { 
+            text-align: center; 
+            margin-bottom: 25px; 
+        }
+        .header-banner img { 
+            max-width: 100%; 
+            max-height: 150px; 
+            border-radius: 12px; 
+            object-fit: contain; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header-banner h2 { 
+            margin-top: 15px; 
+            margin-bottom: 0; 
+            color: #0f172a; 
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b; }
+        input[type="text"], input[type="tel"], input[type="number"], input[type="password"] { 
+            width: 100%; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-size: 0.95rem; background: rgba(255, 255, 255, 0.9);
+        }
+        input:focus { border-color: #0284c7; outline: none; background: #ffffff; box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15); }
+        .signature-pad-container { border: 1.5px solid #cbd5e1; border-radius: 10px; background: #ffffff; position: relative; }
+        canvas { width: 100%; height: 180px; display: block; touch-action: none; cursor: crosshair; }
+        .signature-actions { display: flex; justify-content: space-between; padding: 8px 12px; background: #f1f5f9; border-top: 1px solid #cbd5e1; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; }
+        .btn-clear { background: none; border: none; color: #ef4444; font-weight: 600; cursor: pointer; }
+        .btn-submit { 
+            background: linear-gradient(135deg, #0284c7 0%, #0f766e 100%); color: white; border: none; width: 100%; padding: 14px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);
+        }
+        .admin-link { text-align: center; margin-top: 20px; font-size: 0.85rem; }
+        .admin-link a { color: #334155; text-decoration: none; cursor: pointer; font-weight: 500; }
+        .admin-link a:hover { color: #0284c7; text-decoration: underline; }
+        #adminDashboard { display: none; margin-top: 25px; border-top: 2px dashed #94a3b8; padding-top: 20px; }
+        .table-container { overflow-x: auto; margin-top: 10px; max-height: 350px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; vertical-align: middle; }
+        th { background: #e2e8f0; color: #1e293b; position: sticky; top: 0; }
+        .btn-logout { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin-bottom: 10px; }
+        .btn-edit { background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; margin-right: 4px; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Mengarah langsung ke file Perkasa.jpeg -->
+    <div class="header-banner">
+        <img src="Perkasa.jpeg" alt="Logo Aplikasi Perkasa">
+        <h2>Formulir Daftar Hadir & Tanda Tangan</h2>
+    </div>
+    
+    <form id="dataForm" onsubmit="handleSubmit(event)">
+        <div class="form-group">
+            <label for="nama">Nama Korlap</label>
+            <input type="text" id="nama" required placeholder="Masukkan nama lengkap">
+        </div>
+        <div class="form-group">
+            <label for="noHp">No. Handphone</label>
+            <input type="tel" id="noHp" required maxlength="15" pattern="[0-9]{10,15}" placeholder="Contoh: 081234567890">
+        </div>
+        <div class="form-group">
+            <label for="instansi">Nama UKPD / Instansi</label>
+            <input type="text" id="instansi" required placeholder="Masukkan nama UKPD atau Instansi">
+        </div>
+        <div class="form-group">
+            <label for="jumlahHadir">Jumlah Anggota yang Hadir</label>
+            <input type="number" id="jumlahHadir" required min="1" placeholder="Masukkan jumlah anggota (angka)">
+        </div>
+        <div class="form-group">
+            <label>Tanda Tangan Elektronik</label>
+            <div class="signature-pad-container">
+                <canvas id="signatureCanvas"></canvas>
+                <div class="signature-actions">
+                    <span style="font-size: 0.8rem; color: #64748b;">Tulis tanda tangan di atas</span>
+                    <button type="button" class="btn-clear" onclick="clearSignature()">Hapus</button>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">Kirim Data</button>
+    </form>
+
+    <div class="admin-link">
+        <a onclick="openAdminLogin()">🔒 Area Khusus Admin</a>
+    </div>
+
+    <div id="adminDashboard">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; color: #1e293b;">Panel Admin</h3>
+            <button class="btn-logout" onclick="logoutAdmin()">Keluar Admin</button>
+        </div>
+        <p style="font-size: 0.85rem; color: #334155; margin-top: 5px;">Rekap data masuk (Realtime):</p>
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Nama Korlap</th>
+                        <th>No HP</th>
+                        <th>Instansi</th>
+                        <th>Hadir</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="6" style="text-align: center; color: #64748b;">Menunggu data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAZ5xAQokVgIOI-sWMNiOrWfvlVaQuNgIE",
+        authDomain: "aplikasi-perkasa.firebaseapp.com",
+        databaseURL: "https://aplikasi-perkasa-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "aplikasi-perkasa",
+        storageBucket: "aplikasi-perkasa.firebasestorage.app",
+        messagingSenderId: "441150704233",
+        appId: "1:441150704233:web:dd01121397779c683370f8",
+        measurementId: "G-HTPLELTD6L"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const canvas = document.getElementById('signatureCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let hasSigned = false;
+
+    function initCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width > 0 ? rect.width : 400;
+        canvas.height = 180;
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    }
+    window.addEventListener('load', initCanvas);
+    setTimeout(initCanvas, 300);
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    canvas.addEventListener('mousedown', (e) => { isDrawing = true; hasSigned = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousemove', (e) => { if (!isDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+    canvas.addEventListener('touchstart', (e) => { isDrawing = true; hasSigned = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }, {passive: false});
+    canvas.addEventListener('touchmove', (e) => { if (!isDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }, {passive: false});
+    canvas.addEventListener('touchend', () => isDrawing = false);
+
+    function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        hasSigned = false;
+    }
+
+    const ADMIN_PASSWORD = "Dadang";
+
+    function openAdminLogin() {
+        const pass = prompt("Masukkan Password Admin:");
+        if (pass === null) return;
+        if (pass === ADMIN_PASSWORD) {
+            document.getElementById('adminDashboard').style.display = 'block';
+            alert('Login Admin Berhasil!');
+            listenRealtimeData(); 
+        } else {
+            alert('Password salah!');
+        }
+    }
+
+    function logoutAdmin() {
+        document.getElementById('adminDashboard').style.display = 'none';
+        alert('Anda telah keluar dari area admin.');
+    }
+
+    function listenRealtimeData() {
+        const tbody = document.querySelector('#dataTable tbody');
+        db.ref('kehadiran').on('value', (snapshot) => {
+            tbody.innerHTML = '';
+            const data = snapshot.val();
+            if (!data) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">Belum ada data masuk.</td></tr>';
+                return;
+            }
+            Object.keys(data).forEach(key => {
+                const row = data[key];
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.waktu || ''}</td>
+                    <td>${row.nama || ''}</td>
+                    <td>${row.noHp || ''}</td>
+                    <td>${row.instansi || ''}</td>
+                    <td>${row.jumlahHadir || ''}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editData('${key}', '${row.nama}', '${row.noHp}', '${row.instansi}', '${row.jumlahHadir}')">Edit</button>
+                        <button class="btn-delete" onclick="deleteData('${key}')">Hapus</button>
+                    </td>
+                `;
+                tbody.prepend(tr);
+            });
+        });
+    }
+
+    function deleteData(key) {
+        if (confirm("Apakah Anda yakin ingin menghapus data kehadiran ini?")) {
+            db.ref('kehadiran/' + key).remove()
+                .then(() => alert("Data berhasil dihapus!"))
+                .catch((error) => alert("Gagal menghapus data: " + error.message));
+        }
+    }
+
+    function editData(key, currentNama, currentNoHp, currentInstansi, currentJumlah) {
+        const newNama = prompt("Edit Nama Korlap:", currentNama);
+        if (newNama === null) return;
+        const newNoHp = prompt("Edit No Handphone:", currentNoHp);
+        if (newNoHp === null) return;
+        const newInstansi = prompt("Edit Nama UKPD / Instansi:", currentInstansi);
+        if (newInstansi === null) return;
+        const newJumlah = prompt("Edit Jumlah Anggota yang Hadir:", currentJumlah);
+        if (newJumlah === null) return;
+
+        if (!/^\d{10,15}$/.test(newNoHp)) {
+            alert('Nomor Handphone harus berupa angka (10-15 digit)! Perubahan dibatalkan.');
+            return;
+        }
+
+        const updatedData = { nama: newNama.trim(), noHp: newNoHp.trim(), instansi: newInstansi.trim(), jumlahHadir: newJumlah };
+        db.ref('kehadiran/' + key).update(updatedData)
+            .then(() => alert("Data berhasil diperbarui!"))
+            .catch((error) => alert("Gagal memperbarui data: " + error.message));
+    }
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        const nama = document.getElementById('nama').value.trim();
+        const noHp = document.getElementById('noHp').value.trim();
+        const instansi = document.getElementById('instansi').value.trim();
+        const jumlahHadir = document.getElementById('jumlahHadir').value;
+
+        if (!/^\d{10,15}$/.test(noHp)) {
+            alert('Nomor Handphone harus berupa angka (10-15 digit)!');
+            return;
+        }
+        if (!hasSigned) {
+            alert('Silakan bubuhkan tanda tangan terlebih dahulu!');
+            return;
+        }
+
+        const signatureData = canvas.toDataURL('image/png');
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Mengirim data...';
+
+        const waktuString = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'medium' });
+        const payload = { waktu: waktuString, nama: nama, noHp: noHp, instansi: instansi, jumlahHadir: jumlahHadir, tandaTangan: signatureData };
+
+        db.ref('kehadiran').push(payload)
+            .then(() => {
+                alert('Data kehadiran dan tanda tangan berhasil disimpan secara realtime!');
+                document.getElementById('dataForm').reset();
+                clearSignature();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Gagal mengirim data ke Firebase: ' + error.message);
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Kirim Data';
+            });
+    }
+</script>
+
+</body>
+</html>
